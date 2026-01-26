@@ -1,0 +1,97 @@
+{
+  "inputs": [
+    "/Users/isaacs_mac/ir_search_engine/logs/final_bm25_noqe.json",
+    "/Users/isaacs_mac/ir_search_engine/logs/final_bm25_qe.json",
+    "/Users/isaacs_mac/ir_search_engine/logs/final_bm25_qe_prf.json",
+    "/Users/isaacs_mac/ir_search_engine/logs/final_rocchio.json",
+    "/Users/isaacs_mac/ir_search_engine/logs/final_bm25_qe_ner.json"
+  ],
+  "rows": [
+    {
+      "system": "final bm25 qe",
+      "flags": "BM25 + k1=1.2 + b=0.75 + QE",
+      "k": 10,
+      "num_queries": 8,
+      "P@k": 0.4125,
+      "R@k": 1.0,
+      "F1@k": 0.5569153069153069,
+      "MAP@k": 1.0,
+      "MRR@k": 1.0,
+      "nDCG@k": 1.0
+    },
+    {
+      "system": "final bm25 qe ner",
+      "flags": "BM25 + k1=1.2 + b=0.75 + QE + NER(w=0.25)",
+      "k": 10,
+      "num_queries": 8,
+      "P@k": 0.4125,
+      "R@k": 1.0,
+      "F1@k": 0.5569153069153069,
+      "MAP@k": 0.99375,
+      "MRR@k": 1.0,
+      "nDCG@k": 0.997861510244586
+    },
+    {
+      "system": "final bm25 noqe",
+      "flags": "BM25 + k1=1.2 + b=0.75",
+      "k": 10,
+      "num_queries": 8,
+      "P@k": 0.4,
+      "R@k": 0.7916666666666666,
+      "F1@k": 0.5096153846153846,
+      "MAP@k": 0.6601851851851852,
+      "MRR@k": 0.675,
+      "nDCG@k": 0.7057021913492955
+    },
+    {
+      "system": "final rocchio",
+      "flags": "BM25 + k1=1.2 + b=0.75 + QE + ROCCHIO(t=5,nr=5)",
+      "k": 10,
+      "num_queries": 8,
+      "P@k": 0.2625,
+      "R@k": 1.0,
+      "F1@k": 0.3750971250971251,
+      "MAP@k": 1.0,
+      "MRR@k": 1.0,
+      "nDCG@k": 1.0
+    },
+    {
+      "system": "final bm25 qe prf",
+      "flags": "BM25 + k1=1.2 + b=0.75 + QE + PRF(d=5,t=5)",
+      "k": 10,
+      "num_queries": 8,
+      "P@k": 0.2375,
+      "R@k": 1.0,
+      "F1@k": 0.3743756243756244,
+      "MAP@k": 0.8645833333333333,
+      "MRR@k": 0.8125,
+      "nDCG@k": 0.8998107326791717
+    }
+  ],
+  "metric_keys": [
+    {
+      "key": "mean_p_at_k",
+      "label": "P@k"
+    },
+    {
+      "key": "mean_r_at_k",
+      "label": "R@k"
+    },
+    {
+      "key": "mean_f1_at_k",
+      "label": "F1@k"
+    },
+    {
+      "key": "map_at_k",
+      "label": "MAP@k"
+    },
+    {
+      "key": "mrr_at_k",
+      "label": "MRR@k"
+    },
+    {
+      "key": "mean_ndcg_at_k",
+      "label": "nDCG@k"
+    }
+  ]
+}

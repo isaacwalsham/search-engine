@@ -1,0 +1,9 @@
+query,expanded_query,final_query,ranker,use_qe,use_prf,prf_docs,prf_terms,use_rocchio,rocchio_alpha,rocchio_beta,rocchio_gamma,rocchio_terms,rocchio_nonrel,use_ner,use_tfidf_norm,k,topk,min_score,min_score_ratio,p_at_k,r_at_k,f1_at_k,ap,rr,ndcg_at_k,num_shown,shown_doc_ids
+English players,English players,English players,bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,0.0,0.0,0.0,0.0,0.0,0.0,0,
+French defender,French defender,French defender,bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,0.2,0.6666666666666666,0.30769230769230765,0.14074074074074075,0.2,0.3228087653971817,10,16 30 5 6 18 19 20 21 28 33
+French defenders,French defenders,French defenders,bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,0.2,0.6666666666666666,0.30769230769230765,0.14074074074074075,0.2,0.3228087653971817,10,16 30 5 6 18 19 20 21 28 33
+Buenos Aires midfielder,Buenos Aires midfielder,Buenos Aires midfielder,bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,1.0,1.0,1.0,1.0,1.0,1.0,1,17
+Paris France defender,Paris France defender,Paris France defender,bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,0.3,1.0,0.4615384615384615,1.0,1.0,1.0,10,18 28 52 1 53 42 16 30 5 6
+"Wiltord, Sylvain","Wiltord, Sylvain","Wiltord, Sylvain",bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,0.5,1.0,0.6666666666666666,1.0,1.0,1.0,2,53 52
+"Placente, Diego","Placente, Diego","Placente, Diego",bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,0.5,1.0,0.6666666666666666,1.0,1.0,1.0,2,12 13
+Diego Placente,Diego Placente,Diego Placente,bm25,False,False,5,5,False,1.0,0.75,0.15,5,5,False,n/a,10,10,,,0.5,1.0,0.6666666666666666,1.0,1.0,1.0,2,12 13

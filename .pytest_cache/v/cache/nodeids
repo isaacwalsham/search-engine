@@ -1,0 +1,12 @@
+[
+  "tests/test_ir_core.py::test_build_inverted_index_shapes",
+  "tests/test_ir_core.py::test_doc_norms_positive",
+  "tests/test_ir_core.py::test_expand_query_disable_is_passthrough",
+  "tests/test_ir_core.py::test_expand_query_returns_string",
+  "tests/test_ir_core.py::test_search_bm25_finds_exact_player",
+  "tests/test_ir_core.py::test_search_deterministic",
+  "tests/test_ir_core.py::test_search_tfidf_finds_exact_player",
+  "tests/test_ir_core.py::test_search_topk_respected",
+  "tests/test_ir_core.py::test_threshold_min_score_filters_if_supported",
+  "tests/test_ir_core.py::test_threshold_ratio_filters_if_supported"
+]
