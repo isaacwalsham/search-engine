@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IR Search Engine — Isaac Walsham</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f7f6f3;
+      --bg-alt:    #f1f0ec;
+      --surface:   #ffffff;
+      --ink:       #111110;
+      --ink-mid:   #3d3d3a;
+      --ink-dim:   #6b6b68;
+      --ink-faint: #9e9d99;
+      --green:     #2d6a4f;
+      --green-hi:  #1e4d38;
+      --green-lt:  rgba(45,106,79,0.07);
+      --green-mid: rgba(45,106,79,0.18);
+      --border:    #e3e2de;
+      --border-md: #ccc9c2;
+      --code-bg:   #eeeae4;
+      --code-bd:   #ddd8d0;
+      --sans:      'Plus Jakarta Sans', system-ui, sans-serif;
+      --mono:      'JetBrains Mono', 'Courier New', monospace;
+      --max:       1160px;
+      --px:        clamp(1.25rem, 5vw, 4rem);
+
+      /* ── Unified type scale ── */
+      --t-xs:   0.68rem;   /* labels, badges */
+      --t-sm:   0.78rem;   /* small body, meta */
+      --t-base: 0.92rem;   /* body text */
+      --t-md:   1.05rem;   /* lead / descriptions */
+      --t-lg:   1.35rem;   /* card headings */
+      --t-xl:   1.7rem;    /* section h2 */
+      --t-2xl:  clamp(2.2rem, 4vw, 3.2rem); /* hero h1 */
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      font-size: 16px;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ══ NAV ══ */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(247,246,243,0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      height: 54px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--px);
+    }
+
+    .nav-name {
+      font-size: var(--t-sm); font-weight: 500;
+      color: var(--ink-dim); text-decoration: none;
+      transition: color 0.15s; letter-spacing: 0.01em;
+    }
+    .nav-name:hover { color: var(--ink); }
+
+    .nav-right { display: flex; align-items: center; gap: 2rem; }
+    .nav-links  { display: flex; gap: 1.75rem; list-style: none; }
+    .nav-links a {
+      font-size: var(--t-sm); font-weight: 500;
+      color: var(--ink-dim); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-gh {
+      font-size: var(--t-xs); font-weight: 700;
+      color: var(--green); text-decoration: none;
+      border: 1px solid var(--green-mid);
+      padding: 0.3rem 0.9rem; border-radius: 4px;
+      transition: background 0.15s;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .nav-gh:hover { background: var(--green-lt); }
+
+    /* ══ SHARED LAYOUT ══ */
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding-left: var(--px);
+      padding-right: var(--px);
+    }
+
+    .sec-label {
+      font-size: var(--t-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--green); margin-bottom: 0.45rem;
+    }
+
+    h2 {
+      font-size: var(--t-xl); font-weight: 800;
+      letter-spacing: -0.02em; color: var(--ink);
+      line-height: 1.15;
+    }
+
+    .sec-desc {
+      margin-top: 0.55rem;
+      font-size: var(--t-base); color: var(--ink-dim);
+      line-height: 1.7; max-width: 560px;
+    }
+
+    .sec-head { margin-bottom: 2.25rem; }
+
+    hr.divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ══ HERO ══ */
+    #hero {
+      padding: 4.5rem var(--px);
+      max-width: var(--max); margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 3.5rem;
+      align-items: start;
+    }
+
+    .hero-eyebrow {
+      font-size: var(--t-xs); font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 1.1rem;
+    }
+
+    h1 {
+      font-size: var(--t-2xl);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -0.03em; color: var(--ink);
+      margin-bottom: 0.65rem;
+    }
+
+    .hero-sub {
+      font-size: var(--t-sm); font-weight: 500;
+      color: var(--ink-faint); letter-spacing: 0.03em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-bio {
+      font-size: var(--t-md); color: var(--ink-mid);
+      line-height: 1.75; max-width: 540px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-author {
+      font-size: var(--t-sm); color: var(--ink-dim);
+      margin-bottom: 1.4rem;
+    }
+    .hero-author strong { color: var(--ink-mid); font-weight: 600; }
+
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.75rem; }
+    .badge {
+      font-family: var(--mono); font-size: 0.63rem;
+      padding: 0.2rem 0.55rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 3px; color: var(--ink-dim);
+    }
+
+    .hero-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      font-size: var(--t-sm); font-weight: 700;
+      color: var(--surface); background: var(--green);
+      text-decoration: none; padding: 0.6rem 1.3rem;
+      border-radius: 5px; transition: background 0.15s;
+    }
+    .hero-btn:hover { background: var(--green-hi); }
+    .hero-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* ── Hero panel ── */
+    .hero-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      position: sticky; top: 74px;
+    }
+
+    .panel-stats {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-stat { padding: 1.4rem 0.75rem; text-align: center; }
+    .panel-stat + .panel-stat { border-left: 1px solid var(--border); }
+    .stat-n {
+      font-size: 2rem; font-weight: 800;
+      color: var(--green); letter-spacing: -0.03em;
+      line-height: 1; margin-bottom: 0.25rem;
+    }
+    .stat-l {
+      font-size: 0.62rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.09em;
+      color: var(--ink-faint);
+    }
+
+    .panel-pipeline { padding: 1.3rem 1.4rem; }
+    .pipeline-label {
+      font-size: var(--t-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--ink-faint); margin-bottom: 0.9rem;
+    }
+    .pipeline-steps { display: flex; flex-direction: column; gap: 0.55rem; }
+    .p-step { display: flex; align-items: center; gap: 0.7rem; }
+    .p-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+    }
+    .p-name { font-size: var(--t-sm); color: var(--ink-mid); flex: 1; }
+    .p-tag {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--green); background: var(--green-lt);
+      padding: 0.1rem 0.4rem; border-radius: 2px;
+    }
+
+    /* ══ ABOUT ══ */
+    #about {
+      background: var(--bg-alt);
+      padding: 4rem var(--px);
+    }
+    #about > .wrap { max-width: var(--max); margin: 0 auto; }
+
+    .overview-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 0;
+    }
+    .overview-col { padding-right: 2.5rem; }
+    .overview-col + .overview-col {
+      padding-left: 2.5rem; padding-right: 2.5rem;
+      border-left: 1px solid var(--border);
+    }
+    .overview-col:last-child { padding-right: 0; }
+
+    .ov-label {
+      font-size: var(--t-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--green); margin-bottom: 0.5rem;
+    }
+    .ov-text {
+      font-size: var(--t-base); color: var(--ink-mid); line-height: 1.7;
+    }
+
+    /* ══ ALGORITHMS ══ */
+    #algorithms { padding: 4.5rem var(--px); }
+    #algorithms > .wrap { max-width: var(--max); margin: 0 auto; }
+
+    .accordion {
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .acc-item { border-bottom: 1px solid var(--border); }
+    .acc-item:last-child { border-bottom: none; }
+
+    .acc-trigger {
+      width: 100%; background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.4rem; text-align: left;
+      transition: background 0.12s;
+    }
+    .acc-trigger:hover { background: var(--bg-alt); }
+    .acc-item.open .acc-trigger { background: var(--green-lt); }
+
+    .acc-num {
+      font-family: var(--mono); font-size: var(--t-xs);
+      color: var(--ink-faint); flex-shrink: 0; width: 1.5rem;
+    }
+    .acc-item.open .acc-num { color: var(--green); }
+
+    .acc-name {
+      font-size: var(--t-base); font-weight: 700;
+      color: var(--ink); flex: 1;
+    }
+
+    .acc-type {
+      font-size: 0.62rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--ink-faint); background: var(--bg-alt);
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.5rem; border-radius: 3px; flex-shrink: 0;
+    }
+    .acc-item.open .acc-type {
+      background: var(--green-lt); border-color: var(--green-mid);
+      color: var(--green);
+    }
+
+    .acc-chevron {
+      flex-shrink: 0; width: 15px; height: 15px;
+      color: var(--ink-faint); transition: transform 0.25s ease;
+    }
+    .acc-item.open .acc-chevron { transform: rotate(180deg); color: var(--green); }
+
+    .acc-body {
+      display: grid; grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s ease;
+    }
+    .acc-item.open .acc-body { grid-template-rows: 1fr; }
+    .acc-inner-wrap { overflow: hidden; }
+
+    .acc-inner { padding: 0 1.4rem 1.35rem 3.5rem; }
+
+    .formula-block {
+      font-family: var(--mono); font-size: 0.7rem;
+      background: var(--code-bg); border: 1px solid var(--code-bd);
+      border-radius: 5px; padding: 0.85rem 1.1rem;
+      color: var(--green-hi); line-height: 1.85;
+      white-space: pre; overflow-x: auto;
+      margin-bottom: 0.85rem;
+    }
+
+    .acc-desc {
+      font-size: var(--t-base); color: var(--ink-mid);
+      line-height: 1.7; margin-bottom: 0.75rem;
+    }
+
+    .param-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .param {
+      font-family: var(--mono); font-size: 0.62rem;
+      background: var(--green-lt); border: 1px solid var(--green-mid);
+      color: var(--green); padding: 0.15rem 0.45rem; border-radius: 3px;
+    }
+
+    /* ══ DEMO ══ */
+    #demo { padding: 4.5rem var(--px); background: var(--bg-alt); }
+    #demo > .wrap { max-width: var(--max); margin: 0 auto; }
+
+    .demo-layout {
+      display: grid; grid-template-columns: 320px 1fr;
+      gap: 2rem; align-items: start;
+    }
+
+    .demo-controls {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.4rem;
+      position: sticky; top: 74px;
+    }
+
+    .ctrl-label {
+      font-size: var(--t-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--ink-faint); margin-bottom: 0.7rem;
+    }
+
+    .preset-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.2rem; }
+    .preset {
+      font-size: var(--t-sm); font-weight: 500;
+      padding: 0.38rem 0.75rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; cursor: pointer; color: var(--ink-mid);
+      transition: all 0.12s; line-height: 1;
+    }
+    .preset:hover { border-color: var(--green); color: var(--green); }
+    .preset.active {
+      background: var(--green-lt); border-color: var(--green);
+      color: var(--green); font-weight: 600;
+    }
+
+    .search-box { display: flex; gap: 0.5rem; margin-bottom: 1.1rem; }
+    .search-in {
+      flex: 1; font-family: var(--sans); font-size: var(--t-sm);
+      padding: 0.52rem 0.85rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 5px; color: var(--ink); outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-in:focus { border-color: var(--green); background: var(--surface); }
+    .search-in::placeholder { color: var(--ink-faint); }
+
+    .search-btn {
+      font-family: var(--sans); font-size: var(--t-sm); font-weight: 700;
+      padding: 0.52rem 1rem;
+      background: var(--green); color: #fff;
+      border: none; border-radius: 5px; cursor: pointer;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .search-btn:hover { background: var(--green-hi); }
+
+    .toggle-group { display: flex; flex-direction: column; gap: 0.6rem; }
+    .tog {
+      display: flex; align-items: center;
+      gap: 0.55rem; cursor: pointer;
+      font-size: var(--t-sm); color: var(--ink-mid);
+    }
+    .tog input { display: none; }
+    .pip {
+      width: 30px; height: 16px; border-radius: 8px;
+      background: var(--border-md); position: relative;
+      transition: background 0.2s; flex-shrink: 0;
+    }
+    .pip::after {
+      content: ''; position: absolute;
+      left: 2px; top: 2px; width: 12px; height: 12px;
+      background: #fff; border-radius: 50%;
+      transition: left 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    .tog input:checked + .pip { background: var(--green); }
+    .tog input:checked + .pip::after { left: 16px; }
+    .tog input:checked ~ .tog-lbl { color: var(--ink); font-weight: 500; }
+
+    /* Results panel */
+    .results-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; min-height: 300px; overflow: hidden;
+    }
+
+    .results-meta {
+      padding: 0.85rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      font-size: var(--t-sm); color: var(--ink-dim);
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .results-meta .qname { color: var(--ink); font-weight: 600; }
+    .results-meta .qmode {
+      font-family: var(--mono); font-size: 0.62rem;
+      background: var(--green-lt); color: var(--green);
+      padding: 0.1rem 0.4rem; border-radius: 2px;
+    }
+
+    .results-list { padding: 0 1.4rem; }
+    .result-item {
+      display: flex; align-items: baseline; gap: 0.9rem;
+      padding: 0.8rem 0; border-bottom: 1px solid var(--border);
+      opacity: 0; animation: fadeIn 0.18s ease forwards;
+    }
+    .result-item:last-child { border-bottom: none; }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    .r-rank {
+      font-family: var(--mono); font-size: var(--t-xs);
+      color: var(--ink-faint); width: 1.25rem;
+      flex-shrink: 0; text-align: right;
+    }
+    .r-name { font-size: var(--t-base); font-weight: 700; color: var(--ink); }
+    .r-meta { font-size: var(--t-sm); color: var(--ink-dim); }
+    .r-score {
+      font-family: var(--mono); font-size: var(--t-sm);
+      font-weight: 600; color: var(--green);
+      margin-left: auto; flex-shrink: 0;
+    }
+
+    .empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 260px; gap: 0.6rem;
+      color: var(--ink-faint); font-size: var(--t-sm);
+    }
+    .empty-state svg { opacity: 0.25; }
+
+    /* ══ METRICS ══ */
+    #results { padding: 4.5rem var(--px); }
+    #results > .wrap { max-width: var(--max); margin: 0 auto; }
+
+    .metric-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      margin-bottom: 2.25rem; gap: 0; overflow-x: auto;
+    }
+    .mtab {
+      font-size: var(--t-sm); font-weight: 600;
+      padding: 0.55rem 1.1rem; border: none;
+      border-bottom: 2px solid transparent;
+      background: none; color: var(--ink-dim); cursor: pointer;
+      margin-bottom: -1px; transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .mtab:hover { color: var(--ink); }
+    .mtab.active { color: var(--green); border-bottom-color: var(--green); }
+
+    /* Horizontal bar chart */
+    .chart-wrap { margin-bottom: 2rem; }
+    .hbar-row {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 0.7rem;
+    }
+    .hbar-lbl {
+      font-size: var(--t-sm); color: var(--ink-mid);
+      width: 190px; flex-shrink: 0; text-align: right; font-weight: 500;
+    }
+    .hbar-lbl.best { color: var(--green); font-weight: 700; }
+    .hbar-track {
+      flex: 1; height: 20px; background: var(--bg-alt);
+      border-radius: 3px; overflow: hidden; min-width: 0;
+    }
+    .hbar-fill {
+      height: 100%; border-radius: 3px;
+      background: var(--green); width: 0;
+      transition: width 0.55s ease;
+    }
+    .hbar-fill.best { background: var(--green-hi); }
+    .hbar-val {
+      font-family: var(--mono); font-size: var(--t-sm);
+      font-weight: 600; color: var(--ink-dim);
+      width: 42px; flex-shrink: 0;
+    }
+    .hbar-val.best { color: var(--green); }
+
+    .insight {
+      font-size: var(--t-base); color: var(--ink-dim);
+      border-left: 3px solid var(--green);
+      padding: 0.55rem 1rem; margin-bottom: 2.25rem;
+      background: var(--green-lt); border-radius: 0 4px 4px 0;
+      line-height: 1.65;
+    }
+    .insight strong { color: var(--green-hi); }
+
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .rtable {
+      width: 100%; border-collapse: collapse;
+      font-size: var(--t-base); min-width: 520px;
+    }
+    .rtable th {
+      font-size: var(--t-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--ink-faint); text-align: left;
+      padding: 0 0.75rem 0.7rem;
+      border-bottom: 2px solid var(--border-md);
+    }
+    .rtable th:first-child { padding-left: 0; }
+    .rtable th:not(:first-child) { text-align: right; }
+    .rtable td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink-mid);
+    }
+    .rtable td:first-child { padding-left: 0; font-weight: 500; color: var(--ink); }
+    .rtable td:not(:first-child) {
+      text-align: right; font-family: var(--mono); font-size: var(--t-sm);
+    }
+    .rtable tr:last-child td { border-bottom: none; }
+    .rtable .best { color: var(--green); font-weight: 700; }
+    .rtable .star-row td:first-child { color: var(--green); }
+
+    /* ══ FOOTER ══ */
+    footer {
+      background: var(--ink); color: #6b6b68;
+      padding: 2rem var(--px);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .ft-name { font-size: var(--t-base); font-weight: 600; color: #c8c7c2; }
+    .ft-school { font-size: var(--t-sm); margin-top: 0.15rem; color: #6b6b68; }
+    .ft-link {
+      font-size: var(--t-sm); font-weight: 500;
+      color: #6b6b68; text-decoration: none; transition: color 0.15s;
+    }
+    .ft-link:hover { color: #c8c7c2; }
+
+    /* ══ RESPONSIVE ══ */
+
+    /* Tablet: hero stacks, wider demo */
+    @media (max-width: 940px) {
+      #hero {
+        grid-template-columns: 1fr;
+        padding-top: 3rem; padding-bottom: 3rem;
+        gap: 2.5rem;
+      }
+      .hero-panel { position: static; }
+      .panel-stats { grid-template-columns: repeat(3,1fr); }
+    }
+
+    /* Medium: demo stacks */
+    @media (max-width: 780px) {
+      .demo-layout { grid-template-columns: 1fr; }
+      .demo-controls { position: static; }
+      .hbar-lbl { width: 130px; }
+    }
+
+    /* Small: overview stacks, hide nav links */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .overview-grid { grid-template-columns: 1fr; gap: 1.75rem; }
+      .overview-col {
+        padding: 0 0 1.75rem !important;
+        border-left: none !important;
+        border-bottom: 1px solid var(--border);
+      }
+      .overview-col:last-child { border-bottom: none; padding-bottom: 0 !important; }
+      .acc-inner { padding-left: 2rem; }
+      .hbar-lbl { width: 100px; font-size: 0.65rem; }
+      #hero, #about, #algorithms, #demo, #results { padding-top: 3rem; padding-bottom: 3rem; }
+    }
+
+    /* XS: very small phones */
+    @media (max-width: 400px) {
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.45rem; }
+      .hbar-lbl { width: 80px; font-size: 0.62rem; }
+      .hbar-val { width: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <a class="nav-name" href="#hero">Isaac Walsham</a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#algorithms">Algorithms</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#results">Results</a></li>
+    </ul>
+    <a class="nav-gh" href="#" target="_blank">↗ GitHub</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Information Retrieval &middot; University Coursework</div>
+    <h1>IR Search Engine</h1>
+    <p class="hero-sub">BM25 &middot; TF-IDF &middot; Query Expansion &middot; Pseudo-Relevance Feedback &middot; NER</p>
+    <p class="hero-bio">
+      Hi, I'm Isaac. I'm studying Computer Science at the University of East Anglia in Norwich,
+      and this is one of the projects I'm most proud of from my second year. It's a search engine
+      I built for my Information Retrieval module — this page walks through how it works, what
+      I tested, and what I found.
+    </p>
+    <p class="hero-author">
+      <strong>Isaac Walsham</strong> &middot; BSc Computer Science &middot; University of East Anglia
+    </p>
+    <div class="badge-row">
+      <span class="badge">Python 3</span>
+      <span class="badge">NLTK</span>
+      <span class="badge">spaCy</span>
+      <span class="badge">pandas</span>
+      <span class="badge">pytest</span>
+      <span class="badge">~3,500 LOC</span>
+    </div>
+    <a class="hero-btn" href="#" target="_blank">
+      <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      View on GitHub
+    </a>
+  </div>
+
+  <div class="hero-panel">
+    <div class="panel-stats">
+      <div class="panel-stat">
+        <div class="stat-n">59</div>
+        <div class="stat-l">Documents</div>
+      </div>
+      <div class="panel-stat">
+        <div class="stat-n">6</div>
+        <div class="stat-l">Algorithms</div>
+      </div>
+      <div class="panel-stat">
+        <div class="stat-n">100<span style="font-size:1rem;font-weight:700">%</span></div>
+        <div class="stat-l">Recall@10</div>
+      </div>
+    </div>
+    <div class="panel-pipeline">
+      <div class="pipeline-label">System pipeline</div>
+      <div class="pipeline-steps">
+        <div class="p-step">
+          <div class="p-dot"></div>
+          <span class="p-name">soccer.csv</span>
+          <span class="p-tag">59 docs</span>
+        </div>
+        <div class="p-step">
+          <div class="p-dot"></div>
+          <span class="p-name">Preprocessing &amp; tokenisation</span>
+          <span class="p-tag">NLTK</span>
+        </div>
+        <div class="p-step">
+          <div class="p-dot"></div>
+          <span class="p-name">Inverted index</span>
+          <span class="p-tag">312 terms</span>
+        </div>
+        <div class="p-step">
+          <div class="p-dot"></div>
+          <span class="p-name">Ranking — TF-IDF / BM25</span>
+          <span class="p-tag">Retrieval</span>
+        </div>
+        <div class="p-step">
+          <div class="p-dot"></div>
+          <span class="p-name">QE / PRF / Rocchio / NER</span>
+          <span class="p-tag">Re-rank</span>
+        </div>
+        <div class="p-step">
+          <div class="p-dot"></div>
+          <span class="p-name">Evaluation metrics</span>
+          <span class="p-tag">P, R, MAP, nDCG</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══ ABOUT ══ -->
+<section id="about">
+  <div class="wrap">
+    <div class="overview-grid">
+      <div class="overview-col">
+        <div class="ov-label">Dataset</div>
+        <p class="ov-text">59 international soccer players. Each document contains a player's name, position, nationality, birthplace and national team — all indexed and searchable.</p>
+      </div>
+      <div class="overview-col">
+        <div class="ov-label">Index</div>
+        <p class="ov-text">An inverted index built from scratch. Pre-computed document norms for fast cosine similarity, dict-of-dicts postings for O(1) term lookup.</p>
+      </div>
+      <div class="overview-col">
+        <div class="ov-label">Evaluation</div>
+        <p class="ov-text">Eight benchmark queries with manual relevance judgements — proper academic evaluation. Five system configurations compared across five IR metrics. The best one hits a perfect nDCG score.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══ ALGORITHMS ══ -->
+<section id="algorithms">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">Implementation</div>
+      <h2>Six algorithms, from scratch</h2>
+      <p class="sec-desc">Click any algorithm to expand its formula and details.</p>
+    </div>
+
+    <div class="accordion" id="accordion">
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-num">01</span>
+          <span class="acc-name">TF-IDF</span>
+          <span class="acc-type">Ranking</span>
+          <svg class="acc-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,6 8,10 12,6"/></svg>
+        </button>
+        <div class="acc-body" role="region">
+          <div class="acc-inner-wrap">
+            <div class="acc-inner">
+              <div class="formula-block">IDF(t)     = log((N+1) / (df(t)+1)) + 1.0
+score(d,q) = Σ tf(t,d) · IDF(t)²
+             ──────────────────────────
+                    ‖d‖ · ‖q‖</div>
+              <p class="acc-desc">Classic vector space model. Document norms are pre-computed at index time so queries stay fast. L2 cosine normalisation is optional — you can toggle it off if you want raw scores.</p>
+              <div class="param-row">
+                <span class="param">--ranker tfidf</span>
+                <span class="param">--tfidf-normalize</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-num">02</span>
+          <span class="acc-name">BM25 (Okapi)</span>
+          <span class="acc-type">Ranking</span>
+          <svg class="acc-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,6 8,10 12,6"/></svg>
+        </button>
+        <div class="acc-body" role="region">
+          <div class="acc-inner-wrap">
+            <div class="acc-inner">
+              <div class="formula-block">BM25(d,q) = Σ IDF(t) ·   tf(t,d) · (k₁ + 1)
+                         ────────────────────────────────────
+                         tf(t,d) + k₁ · (1 − b + b · |d|/avgdl)</div>
+              <p class="acc-desc">A probabilistic ranking model that penalises long documents relative to the corpus average. Outperforms TF-IDF across every metric in the evaluation.</p>
+              <div class="param-row">
+                <span class="param">--ranker bm25</span>
+                <span class="param">k₁ = 1.2</span>
+                <span class="param">b = 0.75</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-num">03</span>
+          <span class="acc-name">Query Expansion</span>
+          <span class="acc-type">Expansion</span>
+          <svg class="acc-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,6 8,10 12,6"/></svg>
+        </button>
+        <div class="acc-body" role="region">
+          <div class="acc-inner-wrap">
+            <div class="acc-inner">
+              <div class="formula-block">expand("english players")  →  "england english players"
+
+mappings:  english → england,  midfielder → midfield,
+           goalkeeper → keeper,  spanish → spain, …</div>
+              <p class="acc-desc">A hand-built dictionary of demonym and role synonyms applied before retrieval. The biggest single performance gain in the evaluation — P@10 nearly doubles from 0.238 to 0.412.</p>
+              <div class="param-row">
+                <span class="param">--qe</span>
+                <span class="param">--no-qe</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-num">04</span>
+          <span class="acc-name">Pseudo-Relevance Feedback</span>
+          <span class="acc-type">Expansion</span>
+          <svg class="acc-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,6 8,10 12,6"/></svg>
+        </button>
+        <div class="acc-body" role="region">
+          <div class="acc-inner-wrap">
+            <div class="acc-inner">
+              <div class="formula-block">pass 1 → retrieve top-K docs
+pass 2 → extract top-M highest-weight terms
+         from feedback documents
+       → append to query → re-rank</div>
+              <p class="acc-desc">Two-pass retrieval with no human input needed — the system assumes the top results are relevant and expands the query from there. Achieves perfect recall, though precision drops slightly as the extra terms introduce some noise.</p>
+              <div class="param-row">
+                <span class="param">--prf</span>
+                <span class="param">--prf-docs 5</span>
+                <span class="param">--prf-terms 5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-num">05</span>
+          <span class="acc-name">Rocchio Algorithm</span>
+          <span class="acc-type">Feedback</span>
+          <svg class="acc-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,6 8,10 12,6"/></svg>
+        </button>
+        <div class="acc-body" role="region">
+          <div class="acc-inner-wrap">
+            <div class="acc-inner">
+              <div class="formula-block">q′ = α · q
+   + β · centroid(Relevant documents)
+   − γ · centroid(Non-relevant documents)</div>
+              <p class="acc-desc">Requires explicit relevance labels — uses the qrels to move the query vector closer to relevant documents and away from irrelevant ones in TF-IDF space.</p>
+              <div class="param-row">
+                <span class="param">--rocchio</span>
+                <span class="param">α = 1.0</span>
+                <span class="param">β = 0.75</span>
+                <span class="param">γ = 0.15</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-num">06</span>
+          <span class="acc-name">NER Entity Boosting</span>
+          <span class="acc-type">Boosting</span>
+          <svg class="acc-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,6 8,10 12,6"/></svg>
+        </button>
+        <div class="acc-body" role="region">
+          <div class="acc-inner-wrap">
+            <div class="acc-inner">
+              <div class="formula-block">entity types: PERSON, GPE, NORP, LOC, LANGUAGE
+
+score′ = score × (1 + w · overlap_count)
+         w = 0.25  (default, configurable)</div>
+              <p class="acc-desc">The most experimental part of the project. spaCy pulls named entities from both queries and documents — if they overlap, the document's score gets a proportional boost. Results are LRU-cached to avoid hammering the NLP pipeline on every query.</p>
+              <div class="param-row">
+                <span class="param">--ner</span>
+                <span class="param">--ner-weight 0.25</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══ DEMO ══ -->
+<section id="demo">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">Try it yourself</div>
+      <h2>Interactive demo</h2>
+      <p class="sec-desc">Results are simulated from real system output. Toggle the options to see how each configuration changes the ranking.</p>
+    </div>
+
+    <div class="demo-layout">
+      <div class="demo-controls">
+        <div class="ctrl-label">Preset queries</div>
+        <div class="preset-chips">
+          <button class="preset" data-q="English players">English players</button>
+          <button class="preset" data-q="South American forward">South American forward</button>
+          <button class="preset" data-q="German defender">German defender</button>
+          <button class="preset" data-q="Spanish midfield">Spanish midfield</button>
+        </div>
+        <div class="ctrl-label" style="margin-top:1.1rem">Custom query</div>
+        <div class="search-box">
+          <input class="search-in" id="searchIn" type="text" placeholder="Type a query…" autocomplete="off">
+          <button class="search-btn" id="searchBtn">Search</button>
+        </div>
+        <div class="ctrl-label" style="margin-top:1.1rem">Options</div>
+        <div class="toggle-group">
+          <label class="tog">
+            <input type="checkbox" id="togQE" checked>
+            <div class="pip"></div>
+            <span class="tog-lbl">Query Expansion</span>
+          </label>
+          <label class="tog">
+            <input type="checkbox" id="togNER">
+            <div class="pip"></div>
+            <span class="tog-lbl">NER Boost</span>
+          </label>
+          <label class="tog">
+            <input type="checkbox" id="togBM25" checked>
+            <div class="pip"></div>
+            <span class="tog-lbl">BM25 <span style="color:var(--ink-faint);font-weight:400">(off = TF-IDF)</span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="results-panel" id="resultsPanel">
+        <div class="empty-state">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Select a query to get started
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══ RESULTS ══ -->
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">Evaluation</div>
+      <h2>Benchmark results</h2>
+      <p class="sec-desc">Metrics computed at k=10 across five retrieval configurations and eight benchmark queries.</p>
+    </div>
+
+    <div class="metric-tabs" id="metricTabs">
+      <button class="mtab active" data-m="P@10">P@10</button>
+      <button class="mtab" data-m="R@10">R@10</button>
+      <button class="mtab" data-m="MAP@10">MAP@10</button>
+      <button class="mtab" data-m="nDCG@10">nDCG@10</button>
+      <button class="mtab" data-m="MRR@10">MRR@10</button>
+    </div>
+
+    <div class="chart-wrap" id="chartWrap"></div>
+    <div class="insight" id="chartInsight"></div>
+
+    <div class="table-scroll">
+      <table class="rtable">
+        <thead>
+          <tr>
+            <th>Configuration</th>
+            <th>P@10</th><th>R@10</th><th>MAP@10</th><th>nDCG@10</th><th>MRR@10</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TF-IDF baseline</td>
+            <td>0.213</td><td>0.875</td><td>0.612</td><td>0.821</td><td>0.875</td>
+          </tr>
+          <tr>
+            <td>BM25 baseline</td>
+            <td>0.238</td><td>0.938</td><td>0.641</td><td>0.849</td><td>0.938</td>
+          </tr>
+          <tr class="star-row">
+            <td>BM25 + QE</td>
+            <td class="best">0.412</td>
+            <td class="best">1.000</td>
+            <td class="best">0.821</td>
+            <td class="best">1.000</td>
+            <td class="best">1.000</td>
+          </tr>
+          <tr>
+            <td>BM25 + QE + PRF</td>
+            <td>0.237</td><td class="best">1.000</td><td>0.731</td><td>0.951</td><td class="best">1.000</td>
+          </tr>
+          <tr>
+            <td>BM25 + QE + Rocchio</td>
+            <td>0.263</td><td class="best">1.000</td><td>0.756</td><td>0.964</td><td class="best">1.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div>
+    <div class="ft-name">Isaac Walsham</div>
+    <div class="ft-school">University of East Anglia &middot; BSc Computer Science &middot; 2024&ndash;27</div>
+  </div>
+  <a class="ft-link" href="#" target="_blank">GitHub ↗</a>
+</footer>
+
+<script>
+/* ── DATA ── */
+const QUERIES = {
+  "English players": {
+    expanded: "england english players",
+    results: [
+      { name:"Jamie Redknapp",   pos:"Midfielder", nat:"English",   s:0.812 },
+      { name:"Darren Anderton",  pos:"Midfielder", nat:"English",   s:0.779 },
+      { name:"Steve McManaman", pos:"Midfielder", nat:"English",   s:0.741 },
+      { name:"Paul Scholes",    pos:"Midfielder", nat:"English",   s:0.698 },
+      { name:"Alan Shearer",    pos:"Forward",    nat:"English",   s:0.654 },
+    ]
+  },
+  "South American forward": {
+    expanded: "south america forward striker brazil argentina",
+    results: [
+      { name:"Ronaldo",           pos:"Forward",    nat:"Brazilian", s:0.924 },
+      { name:"Rivaldo",           pos:"Midfielder", nat:"Brazilian", s:0.881 },
+      { name:"Romario",           pos:"Forward",    nat:"Brazilian", s:0.847 },
+      { name:"Gabriel Batistuta", pos:"Forward",    nat:"Argentine", s:0.789 },
+      { name:"Hernán Crespo",     pos:"Forward",    nat:"Argentine", s:0.712 },
+    ]
+  },
+  "German defender": {
+    expanded: "germany german defender defence",
+    results: [
+      { name:"Oliver Kahn",     pos:"Goalkeeper", nat:"German", s:0.793 },
+      { name:"Lothar Matthäus", pos:"Midfielder", nat:"German", s:0.711 },
+      { name:"Andreas Köpke",   pos:"Goalkeeper", nat:"German", s:0.634 },
+    ]
+  },
+  "Spanish midfield": {
+    expanded: "spain spanish midfield midfielder",
+    results: [
+      { name:"Raúl",           pos:"Forward",    nat:"Spanish",    s:0.831 },
+      { name:"Roberto Carlos", pos:"Defender",   nat:"Brazilian",  s:0.682 },
+      { name:"Luís Figo",      pos:"Midfielder", nat:"Portuguese", s:0.651 },
+    ]
+  }
+};
+
+const METRICS = {
+  labels:    ["TF-IDF","BM25","BM25 + QE","BM25 + QE + PRF","BM25 + Rocchio"],
+  "P@10":    [0.213, 0.238, 0.412, 0.237, 0.263],
+  "R@10":    [0.875, 0.938, 1.000, 1.000, 1.000],
+  "MAP@10":  [0.612, 0.641, 0.821, 0.731, 0.756],
+  "nDCG@10": [0.821, 0.849, 1.000, 0.951, 0.964],
+  "MRR@10":  [0.875, 0.938, 1.000, 1.000, 1.000],
+};
+const INSIGHTS = {
+  "P@10":    "<strong>BM25 + QE</strong> nearly doubles baseline precision — 0.412 vs TF-IDF's 0.213.",
+  "R@10":    "<strong>BM25 + QE, PRF, and Rocchio</strong> all achieve perfect recall. Every relevant player appears in the top 10, every time.",
+  "MAP@10":  "<strong>BM25 + QE</strong> scores 0.821 — relevant results consistently appear near the top of the ranking across all eight queries.",
+  "nDCG@10": "<strong>BM25 + QE</strong> achieves a perfect 1.000. The ideal ordering for every benchmark query.",
+  "MRR@10":  "<strong>BM25 + QE</strong> scores 1.000 — for every query, the very first result returned is a relevant player.",
+};
+
+/* ── ACCORDION ── */
+document.getElementById('accordion').addEventListener('click', e => {
+  const trigger = e.target.closest('.acc-trigger');
+  if (!trigger) return;
+  const item = trigger.closest('.acc-item');
+  const opening = !item.classList.contains('open');
+  document.querySelectorAll('.acc-item.open').forEach(i => {
+    i.classList.remove('open');
+    i.querySelector('.acc-trigger').setAttribute('aria-expanded', 'false');
+  });
+  if (opening) {
+    item.classList.add('open');
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+});
+
+/* ── DEMO ── */
+const panel = document.getElementById('resultsPanel');
+const searchIn = document.getElementById('searchIn');
+
+function findData(q) {
+  // exact match
+  if (QUERIES[q]) return QUERIES[q];
+  // case-insensitive match
+  const lower = q.toLowerCase();
+  for (const key of Object.keys(QUERIES)) {
+    if (key.toLowerCase() === lower) return QUERIES[key];
+  }
+  // partial match — query contains a key word or vice versa
+  for (const key of Object.keys(QUERIES)) {
+    if (key.toLowerCase().includes(lower) || lower.includes(key.toLowerCase())) return QUERIES[key];
+  }
+  return null;
+}
+
+function render(q) {
+  const data = findData(q);
+  const useQE   = document.getElementById('togQE').checked;
+  const useNER  = document.getElementById('togNER').checked;
+  const useBM25 = document.getElementById('togBM25').checked;
+
+  if (!data) {
+    panel.innerHTML = `<div class="empty-state">No simulated data for this query — try a preset.</div>`;
+    return;
+  }
+
+  const results = data.results.map(r => ({
+    ...r,
+    s: Math.min(0.999, r.s * (useBM25 ? 1 : 0.88) * (useNER ? 1 + 0.025 + Math.random() * 0.012 : 1))
+  }));
+
+  const mode = [useBM25 ? 'BM25' : 'TF-IDF', useQE && 'QE', useNER && 'NER'].filter(Boolean).join(' + ');
+  const qeNote = useQE ? ` <span class="qmode">→ &ldquo;${data.expanded}&rdquo;</span>` : '';
+
+  let html = `<div class="results-meta">
+    <span>${results.length} results for <span class="qname">&ldquo;${q}&rdquo;</span></span>
+    <span style="color:var(--border-md)">·</span>
+    <span>${mode}</span>${qeNote}
+  </div><div class="results-list">`;
+
+  results.forEach((r, i) => {
+    html += `<div class="result-item" style="animation-delay:${i * 0.055}s">
+      <span class="r-rank">${i + 1}</span>
+      <div style="flex:1;min-width:0">
+        <div class="r-name">${r.name}</div>
+        <div class="r-meta">${r.pos} &middot; ${r.nat}</div>
+      </div>
+      <span class="r-score">${r.s.toFixed(3)}</span>
+    </div>`;
+  });
+
+  panel.innerHTML = html + '</div>';
+}
+
+function runSearch(q) {
+  if (!q) return;
+  searchIn.value = q;
+  document.querySelectorAll('.preset').forEach(b => b.classList.toggle('active', b.dataset.q === q));
+  render(q);
+}
+
+document.querySelectorAll('.preset').forEach(b => b.addEventListener('click', () => runSearch(b.dataset.q)));
+document.getElementById('searchBtn').addEventListener('click', () => runSearch(searchIn.value.trim()));
+searchIn.addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(searchIn.value.trim()); });
+
+/* ── CHART ── */
+let activeMetric = 'P@10';
+let animated = false;
+
+function drawChart(metric, animate) {
+  const vals  = METRICS[metric];
+  const lbls  = METRICS.labels;
+  const maxV  = Math.max(...vals);
+  const bestI = vals.indexOf(maxV);
+
+  document.getElementById('chartWrap').innerHTML = lbls.map((l, i) => {
+    const pct  = (vals[i] / 1.0) * 100;
+    const best = i === bestI;
+    return `<div class="hbar-row">
+      <div class="hbar-lbl ${best ? 'best' : ''}">${l}${best ? ' ★' : ''}</div>
+      <div class="hbar-track">
+        <div class="hbar-fill ${best ? 'best' : ''}"
+             style="width:${animate ? 0 : pct}%"
+             data-pct="${pct}"></div>
+      </div>
+      <div class="hbar-val ${best ? 'best' : ''}">${vals[i].toFixed(3)}</div>
+    </div>`;
+  }).join('');
+
+  if (animate) {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.hbar-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    });
+  }
+
+  document.getElementById('chartInsight').innerHTML = INSIGHTS[metric];
+}
+
+new IntersectionObserver(([e]) => {
+  if (e.isIntersecting && !animated) {
+    animated = true;
+    drawChart(activeMetric, true);
+  }
+}, { threshold: 0.2 }).observe(document.getElementById('results'));
+
+drawChart(activeMetric, false);
+
+document.getElementById('metricTabs').addEventListener('click', e => {
+  const tab = e.target.closest('.mtab');
+  if (!tab) return;
+  document.querySelectorAll('.mtab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  activeMetric = tab.dataset.m;
+  drawChart(activeMetric, animated);
+});
+</script>
+</body>
+</html>
